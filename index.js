@@ -3,11 +3,11 @@
 // @namespace   Violentmonkey Scripts
 // @match        *://*/*
 // @exclude      *://github.com/*
-// @grant        none
-// @version      1.0
-// @description  this Scripts is baseon https://tools.thatwind.com/tool/m3u8downloader
+// @version      1.3
+// @description  ffandown m3u8下载器视频嗅探插件
 // @icon          https://pic.kblue.site/picgo/ffandown_favicon.ico
 // @author       helsonlin
+// @license MIT
 // @namespace    https://github.com/helson-lin
 // @homepage     https://github.com/helson-lin
 // @match        *://*/*
@@ -32,9 +32,8 @@
 
 (function () {
     'use strict';
-    const FFANDOWN_URL = 'http://192.168.31.20:8081'
+    const FFANDOWN_URL = 'http://192.168.31.22:8081'
     const mgmapi = {
-
         addStyle(s) {
             let style = document.createElement("style");
             style.innerHTML = s;
@@ -68,6 +67,7 @@
                     headers: {
                       "content-type": "application/json"
                     },
+                    timeout: 3000,
                     contentType: "application/json",
                     dataType: "json",
                     responseType: 'json',
@@ -83,8 +83,8 @@
                         }
                         resolve()
                     },
-                    onerror() {
-                        reject(new Error());
+                    onerror(e) {
+                        reject(e);
                     }
                 })
             })
@@ -104,7 +104,7 @@
         },
         message(text, type) {
             if (!this.notyf) {
-                this.notyf = new Notyf();
+                this.notyf = new Notyf({duration: 1000,position: {x: 'left',y: 'top'}})
             }
             if(type === 'success') {
                 this.notyf.success(text)
@@ -115,7 +115,7 @@
     };
     document.addEventListener('DOMContentLoaded',function(){
         const styleEL = document.createElement("style")
-        styleEL.innerText = "@import url('https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.css')"
+        styleEL.innerText = "@import url('https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.css'); .notyf {font-size: 12px !important;}"
         document.body.append(styleEL)
     });
     // iframe 信息交流
@@ -202,15 +202,17 @@
             data-number="0"
             style="
                 display: inline-flex;
-                width: 25px;
-                height: 25px;
+                width: 1.5rem;
+                height: 1.5rem;
                 background: rgba(255,255,255,0.3);
                 backdrop-filter: blur(10px);
-                padding: 10px;
-                border-radius: 100px;
+                padding: 0.1rem;
+                border-radius: 50%;
                 margin-bottom: 5px;
                 cursor: pointer;
                 border: 2px solid rgba(100, 108, 255, 0.7);
+                justify-content: center;
+                align-items: center;
             "
         >
         <svg t="1682781761045" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="44387" xmlns:xlink="http://www.w3.org/1999/xlink" width="25" height="25"><path d="M537 137c165.23 0 302.183 121.067 326.991 279.332C922.626 464.753 960 538.012 960 620c0 145.803-118.197 264-264 264H348c-156.942-0.542-284-127.933-284-285 0-115.73 68.98-215.348 168.067-259.984C282.35 220.296 399.947 137 537 137z m-25 255c-17.673 0-32 14.327-32 32v175.758l-45.373-45.383-0.377-0.372c-12.524-12.127-32.506-12.003-44.877 0.372-12.497 12.5-12.497 32.765 0 45.265l84.52 84.54 0.635 0.624c21.06 20.395 54.635 20.27 75.543-0.434l85.444-84.618 0.373-0.375c12.186-12.467 12.162-32.453-0.148-44.89-12.435-12.561-32.696-12.662-45.255-0.225L544 600.296V424c0-17.673-14.327-32-32-32z" fill="#6495ED" p-id="44388"></path></svg>
@@ -223,6 +225,7 @@
     const style = document.createElement("style");
 
     style.innerHTML = `
+        .notyf {font-size:12px !important;}
         .number-indicator{
             position:relative;
         }
@@ -375,7 +378,7 @@
             duration: manifest.duration ? `${Math.ceil(manifest.duration * 10 / 60) / 10} mins` : manifest.playlists ? `多(Multi)(${manifest.playlists.length})` : "未知(unknown)",
             async download() {
                 const file_name = await getTopTitle() || Date.now().toString();
-                mgmapi.setDownloadToFFandown(url.href, file_name)
+                mgmapi.setDownloadToFFandown(url.href, file_name).then(() => mgmapi.message("任务发送成功", "success")).catch(() => mgmapi.message("无法与主机通信,请检查服务器地址", "error"))
             }
         })
 
