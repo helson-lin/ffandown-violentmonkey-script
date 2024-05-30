@@ -1,0 +1,27 @@
+{
+  "name": "ffandown-crab",
+  "version": "1.0.1",
+  "description": "",
+  "main": "src/main.js",
+  "scripts": {
+    "dev": "nodemon",
+    "build:dev": "npx webpack --config webpack.dev.js",
+    "build:prod": "npx webpack --config webpack.prod.js",
+    "eslint": "eslint --init",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": ["violentmonkey", "script"],
+  "author": "helsonlin",
+  "license": "MIT",
+  "devDependencies": {
+    "babel-loader": "^9.1.3",
+    "css-loader": "^7.1.1",
+    "eslint": "^9.2.0",
+    "globals": "^15.1.0",
+    "style-loader": "^4.0.0",
+    "vue": "^3.4.26",
+    "vue-loader": "^17.4.2",
+    "webpack": "^5.91.0",
+    "webpack-cli": "^5.1.4"
+  }
+}
