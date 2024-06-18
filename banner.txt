@@ -1,0 +1,31 @@
+// ==UserScript==
+// @name        ffandown
+// @namespace   Violentmonkey Scripts
+// @match        *://*/*
+// @exclude      *://github.com/*
+// @version      1.4
+// @description  ffandown m3u8下载器视频嗅探插件
+// @icon          https://pic.kblue.site/picgo/ffandown_favicon.ico
+// @author       helsonlin
+// @license MIT
+// @namespace    https://github.com/helson-lin
+// @homepage     https://github.com/helson-lin
+// @match        *://*/*
+// @exclude      *://github.com/*
+// @require      https://file.helson-lin.cn/notyf/m3u8-parser.min.js
+// @require      https://file.helson-lin.cn/notyf/notyf.min.js
+// @connect      *
+// @grant        unsafeWindow
+// @grant        GM_openInTab
+// @grant        GM.openInTab
+// @grant        GM_getValue
+// @grant        GM.getValue
+// @grant        GM_setValue
+// @grant        GM.setValue
+// @grant        GM_deleteValue
+// @grant        GM.deleteValue
+// @grant        GM_xmlhttpRequest
+// @grant        GM.xmlHttpRequest
+// @grant        GM_download
+// @run-at       document-start
+// ==/UserScript==

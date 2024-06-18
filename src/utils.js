@@ -112,7 +112,7 @@ const Utils = {
     document.addEventListener("DOMContentLoaded", function () {
       const styleEL = document.createElement("style");
       styleEL.innerText =
-        "@import url('https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.css'); .notyf {font-size: 12px !important;}";
+        "@import url('https://file.helson-lin.cn/notyf/notyf.min.css'); .notyf {font-size: 12px !important;}";
       document.body.append(styleEL);
     });
   },

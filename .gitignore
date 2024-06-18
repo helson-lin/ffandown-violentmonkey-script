@@ -36,7 +36,6 @@
 
 # 文档
 *.md
-*.txt
 *.rst
 *.adoc
 *.pdf
