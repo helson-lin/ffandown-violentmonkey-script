@@ -1,5 +1,5 @@
 <template>
-    <div class="crab-dialog" v-if="show">
+    <div class="crab-dialog" v-if="show" @click="dialogClick">
         <div class="crab-dialog-inner">
             <div class="crab-dialog-inner-header">
                 <div class="text-md">{{ title }}</div>
@@ -29,10 +29,16 @@ export default defineComponent({
         }
     },
     setup(_, ctx) {
+        const dialogClick = (ev) => {
+            const element = ev.target
+            const isOuter = Array.from(element.classList).includes('crab-dialog')
+            if (isOuter) ctx.emit('update:show', false)
+        }
         const close = () => {
             ctx.emit('update:show', false)
         }
         return {
+            dialogClick,
             close
         }
     }

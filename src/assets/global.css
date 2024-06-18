@@ -1,11 +1,15 @@
 :host {
-  --root-size: 16px; /* 默认值 */
+  --root-size: 14px; /* 默认值 */
 }
 
 @media (min-width: 768px) {
   :host {
-    --root-size: 20px; /* PC 端的值 */
+    --root-size: 16px; /* PC 端的值 */
   }
+}
+
+#crab-root {
+  color: #000;
 }
 
 #crab-root .btn {
@@ -68,6 +72,7 @@
 
 #crab-root .crab-dialog .crab-dialog-inner {
   min-width: calc(var(--root-size) * 20);
+  max-width: 70%;
   background-color: #fff;
   box-shadow: 0 2px 4px rgba(0, 0, 0, .12), 0 0 6px rgba(0, 0, 0, .04);
   border-radius: 5px;
@@ -180,6 +185,8 @@
   display: flex;
   flex-direction: column;
   padding: calc(var(--root-size) / 2);
+  max-height: calc(var(--root-size)* 20);
+  overflow-y: auto;
 }
 
 #crab-root .crab-media-list .crab-media {
