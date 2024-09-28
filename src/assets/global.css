@@ -1,3 +1,7 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 :host {
   --root-size: 14px; /* 默认值 */
 }
@@ -10,27 +14,21 @@
 
 #crab-root {
   color: #000;
+  font-family: monospace, sans-serif;
+  font-size: clac(var(--root-size) / 2);
 }
-
+/* 
 #crab-root .btn {
   position: fixed;
-  right: calc(var(--root-size) * 2);
-  bottom: calc(var(--root-size) * 2);
-  width: calc(var(--root-size) * 2);
-  height: calc(var(--root-size) * 2);
+  right: 1rem;
+  bottom: 1rem;
+  width: 3rem;
+  height: 3rem;
   cursor: pointer;
   z-index: 2047;
   display: flex;
   align-items: center;
-  background-color: #fff;
-  box-shadow: 0px 5px 10px 5px rgba(0, 0, 0, 0.1);
-  border-radius: 50%;
-  padding: calc(var(--root-size)/2);
-  -webkit-border-radius: 50%;
-  -moz-border-radius: 50%;
-  -ms-border-radius: 50%;
-  -o-border-radius: 50%;
-}
+} */
 
 .btn svg {
   width: 100%;
@@ -43,14 +41,14 @@
   cursor: pointer;
 }
 
-#crab-root .text-md {
+/* #crab-root .text-md {
   font-weight: bold;
   font-size:calc(var(--root-size) - 2px);
-}
+} */
 
-#crab-root .text-sm {
+/* #crab-root .text-sm {
   font-size: calc(var(--root-size) - 4px);
-}
+} */
 
 #crab-root .crab-dialog {
   position: fixed;
@@ -112,7 +110,7 @@
   -o-border-radius: 5px;
 }
 
-#crab-root .show {
+.show {
   opacity: 1;
   transition: opacity 500ms ease-in-out;
   -webkit-transition: opacity 500ms ease-in-out;
@@ -144,13 +142,22 @@
 
 #crab-root .crab-setting {
   display: flex;
+  flex-direction: column;
   align-items: center;
   padding: calc(var(--root-size) / 2);
 }
 
-#crab-root .crab-setting label {
-  margin-right: calc(var(--root-size) / 2);
-  width: calc(var(--root-size) * 3);
+
+#crab-root .crab-setting .setting-item {
+  /* margin-right: calc(var(--root-size) / 2); */
+  /* width: calc(var(--root-size) * 3); */
+  width: 100%;
+  padding: 0 calc(var(--root-size) / 2);
+  margin-bottom: calc(var(--root-size) / 2);
+}
+
+#crab-root .crab-setting .setting-item label {
+  margin-bottom: calc(var(--root-size) / 2);
 }
 
 #crab-root .crab-setting .server-url {
@@ -216,7 +223,7 @@
   font-size: calc(var(--root-size) - 4px);
 }
 
-#crab-root .crab-media-list .crab-media button {
+/* #crab-root .crab-media-list .crab-media button {
   outline: none;
   border: none;
   margin-left: calc(var(--root-size) /2 );
@@ -229,4 +236,69 @@
   -moz-border-radius: 5px;
   -ms-border-radius: 5px;
   -o-border-radius: 5px;
+} */
+
+
+
+.select {
+  position: relative;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.select-title {
+  position: relative;
+  width: 100%;
+  border: 1px solid #dcdee2;
+  color: #515a6e;
+  padding: calc(var(--root-size) / 2);
+  box-sizing: border-box;
+  border-radius: 5px;
+  -webkit-border-radius: 5px;
+  -moz-border-radius: 5px;
+  -ms-border-radius: 5px;
+  -o-border-radius: 5px;
+  box-sizing: border-box;
+  cursor: pointer;
+}
+
+.select-title::after {
+  position: absolute;
+  top: 0;
+  right: 5px;
+  width: 20px;
+  height: 100%;
+  line-height: 40px;
+  text-align: center;
+  content: "";
+  background-image: url("data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBzdGFuZGFsb25lPSJubyI/PjwhRE9DVFlQRSBzdmcgUFVCTElDICItLy9XM0MvL0RURCBTVkcgMS4xLy9FTiIgImh0dHA6Ly93d3cudzMub3JnL0dyYXBoaWNzL1NWRy8xLjEvRFREL3N2ZzExLmR0ZCI+PHN2ZyB0PSIxNzI3NDI3NDgxNDA2IiBjbGFzcz0iaWNvbiIgdmlld0JveD0iMCAwIDEwMjQgMTAyNCIgdmVyc2lvbj0iMS4xIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHAtaWQ9IjcyMTEiIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIiB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCI+PHBhdGggZD0iTTc3Ni44MzIgMzg1LjgzNDY2N0w1MTIgMTIxLjAwMjY2NyAyNDcuMTY4IDM4NS44MzQ2NjdsNjAuMzMwNjY3IDYwLjMzMDY2Nkw1MTIgMjQxLjY2NGwyMDQuNTAxMzMzIDIwNC41MDEzMzMgNjAuMzMwNjY3LTYwLjMzMDY2NnpNMjQ3LjE2OCA2MzguMTY1MzMzTDUxMiA5MDIuOTk3MzMzbDI2NC44MzItMjY0LjgzMi02MC4zMzA2NjctNjAuMzMwNjY2TDUxMiA3ODIuMzM2bC0yMDQuNTAxMzMzLTIwNC41MDEzMzMtNjAuMzMwNjY3IDYwLjMzMDY2NnoiIHAtaWQ9IjcyMTIiPjwvcGF0aD48L3N2Zz4=");
+  background-size: 80%;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+.select-list {
+  position: absolute;
+  top: 30px;
+  left: 0;
+  width: 100%;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background-color: #fff;
+  padding-left: 0px;
+  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+}
+
+.select-item {
+  width: 100%;
+  height: 40px;
+  line-height: 40px;
+  list-style: none;
+  padding: 0 10px;
+  cursor: pointer;
+  box-sizing: border-box;
+}
+
+.select-item:hover {
+  background-color: #eee;
 }

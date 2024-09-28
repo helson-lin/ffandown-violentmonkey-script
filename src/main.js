@@ -1,2 +1,2 @@
-import Crab from "./crab";
-new Crab().start()
+import TmpScipt from './bin'
+new TmpScipt()

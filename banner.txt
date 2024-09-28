@@ -1,10 +1,10 @@
 // ==UserScript==
 // @name        ffandown
-// @namespace   Violentmonkey Scripts
+// @namespace   ffandown
 // @match        *://*/*
 // @exclude      *://github.com/*
-// @version      1.4
-// @description  ffandown m3u8下载器视频嗅探插件
+// @version      1.4.1
+// @description  ffandown m3u8视频嗅探插件
 // @icon          https://pic.kblue.site/picgo/ffandown_favicon.ico
 // @author       helsonlin
 // @license MIT

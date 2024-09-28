@@ -7,6 +7,7 @@
     "dev": "nodemon",
     "build:dev": "npx webpack --config webpack.dev.js",
     "build:prod": "npx webpack --config webpack.prod.js",
+    "build:css": "npx tailwindcss -i ./src/assets/global.css -o ./src/main.css",
     "eslint": "eslint --init",
     "test": "echo \"Error: no test specified\" && exit 1"
   },

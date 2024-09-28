@@ -1,6 +1,3 @@
-import Home from "./page/index.vue";
-import { createApp } from "vue";
-const globalCSS = require("./assets/global.css");
 const Utils = {
   log(content) {
     const fun = console.log;
@@ -57,6 +54,17 @@ const Utils = {
         : GM.xmlHttpRequest
     )(details);
   },
+  params2QueryString(data) {
+    const params = new URLSearchParams();
+    for (const key in data) {
+      if (typeof data[key] === 'object') {
+        params.append(key, JSON.stringify(data[key]));
+      } else {
+        params.append(key, data[key]);
+      }
+    }
+    return params.toString();
+  },
   sendDownloadToFFandown(FFANDOWN_URL, url, name) {
     const _this = this;
     return new Promise((resolve, reject) => {
@@ -86,6 +94,45 @@ const Utils = {
         },
         onerror(e) {
           Utils.message("Send failed: " + e.statusText);
+          reject(e);
+        },
+      });
+    });
+  },
+  sendDownloadRequest({ serverConfig, url, audioUrl, name }) {
+    const _this = this;
+    return new Promise((resolve, reject) => {
+      const paramsConfigString = serverConfig?.params?.replaceAll('$name', name)?.replaceAll('$url', url).replaceAll('$audioUrl', audioUrl);
+      let requestParams;
+      try {
+        requestParams = JSON.parse(paramsConfigString);
+      } catch (error) {
+        Utils.message("params config error");
+        resolve();
+        return;
+      }
+      this.xmlHttpRequest({
+        url: serverConfig?.method === 'POST' ? serverConfig?.url : `${serverConfig?.url}?${_this.params2QueryString(requestParams)}`,
+        method: serverConfig?.method,
+        headers: {
+          "content-type": "application/json",
+        },
+        timeout: 3000,
+        contentType: "application/json",
+        dataType: "json",
+        responseType: "json",
+        data: JSON.stringify(requestParams),
+        onload(r) {
+          const status = r.status;
+          if (status && status === 200) {
+            Utils.message("发送成功", "success");
+          } else {
+            Utils.message("发送失败");
+          }
+          resolve();
+        },
+        onerror(e) {
+          Utils.message("发送失败: " + e.statusText);
           reject(e);
         },
       });
@@ -178,6 +225,10 @@ const Utils = {
       return codec;
     };
     // TODO: add audio support
+    const audioUrls = data?.data?.dash?.audio
+      .filter(i => ['mp4a.40.2'].includes(i?.codecs))
+      .sort((a, b) => b.bandwidth - a.bandwidth); // 按照bandwidth从大到小排序
+    // 对audiUrls内的按照bandwidth从大到小排序
     return data?.data?.dash?.video?.map((i) => {
       const info = {};
       const ratio =
@@ -188,6 +239,7 @@ const Utils = {
       info.duration = ratio + "/" + codecn;
       info.type = "M4S";
       info.url = i.baseUrl;
+      info.audioUrl = audioUrls?.[0]?.baseUrl;
       return info;
     });
   },
@@ -207,15 +259,6 @@ const Utils = {
         return [];
       }
     }
-  },
-  createShadowDom() {
-    const rootDiv = document.createElement("div");
-    // rootDiv.style = `position: fixed;z-index: 9999;width: 100%;height:100%; pointer-events: none;`;
-    document.documentElement.appendChild(rootDiv);
-    const shadowDOM = rootDiv.attachShadow({ mode: "open" });
-    createApp(Home).mount(shadowDOM);
-    rootDiv.shadowRoot.appendChild(document.createElement("style"));
-    shadowDOM.querySelector("style").innerHTML = globalCSS;
   },
 };
 

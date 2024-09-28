@@ -1,10 +1,11 @@
 {
-    "restartable": "rs",
-    "verbose": true,
-    "watch": ["src/"],
-    "ignore": ["src/main.css"],
-    "delay": "1000",
-    "exec": "npm run build:prod",
-    "ext": "js txt css vue"
-  }
-  
+  "restartable": "rs",
+  "verbose": true,
+  "watch": [
+    "src/**/*",
+    "src/page/*"
+  ],
+  "ignore": [],
+  "exec": "npm run build:css && npm run build:prod",
+  "ext": "js txt css vue"
+}

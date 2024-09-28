@@ -1,9 +1,9 @@
 <template>
-    <div id="crab-root">
-        <div v-show="ffandownTool" ref="crabRef" class="btn" @click="toggleBtn">
+    <div id="crab-root" class="pointer-events-none" @keydown.stop @keyup.stop>
+        <div v-show="ffandownTool" ref="crabRef" class="fixed right-4 bottom-4 w-12 h-12 bg-white rounded-full shadow-2xl shadow-black px-2 py-2 z-50 cursor-pointer pointer-events-auto" style="z-index: 33199;" @click="toggleBtn">
             <svg
                 t="1715233840752"
-                class="icon"
+                class="w-full h-full"
                 viewBox="0 0 1024 1024"
                 version="1.1"
                 xmlns="http://www.w3.org/2000/svg"
@@ -21,15 +21,15 @@
                 ></path>
             </svg>
             <!-- 查看资源/设置 -->
-            <div :class="{ 'crab-sliderbar': true, show: showFastBtn }">
+            <div :class="{ show: showFastBtn }" class="flex flex-col rounded-md absolute right-16 bottom-0 z-50 bg-white opacity-0 shadow-2xl shadow-black">
                 <div
-                    class="item"
+                    class="w-full flex items-center  px-2 py-1 cursor-pointer rounded-md hover:bg-slate-100"
                     v-for="btn in fastBtns"
                     :key="btn.code"
                     @click.stop="btn?.action"
                 >
-                    <span class="crab-icon" v-html="btn.icon"></span>
-                    <span class="text-sm">{{ btn.name }}</span>
+                    <span class="w-4 h-4 mb-1" v-html="btn.icon"></span>
+                    <span class="ml-2 w-16 text-sm leading-4">{{ btn.name }}</span>
                 </div>
             </div>
         </div>
@@ -42,7 +42,7 @@
     </div>
 </template>
 <script>
-import mitter from "../mitter";
+import mitter from "../bin/mitter.js";
 import { defineComponent, onMounted, ref } from "vue";
 import Dialog from "./Dialog.vue";
 import Setting from "./Setting.vue";

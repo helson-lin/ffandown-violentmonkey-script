@@ -1,4 +1,4 @@
-import Utils from "./utils";
+import Utils from "./utils.js";
 import mitter from "./mitter.js";
 class Crab {
   handlers = [
@@ -16,12 +16,11 @@ class Crab {
     },
   ];
   // 服务复制
-  ffandownURL;
+  backendConfig;
   // 资源列表
   list = [];
   start() {
     Utils.log("Started");
-    Utils.createShadowDom();
     this.intercept(this.contentResolver);
     // 自动检测网址
     this.autoCheckWebsite();
@@ -63,12 +62,12 @@ class Crab {
     const handlers = this.handlers.filter((h) => h.match({ content, url }));
     handlers.forEach((h) => h.handle.bind(this, { content, url })());
   }
-  addMedia({ url, type, duration }) {
+  addMedia({ url, type, duration, audioUrl }) {
     const isHaveSameUrl =
       this.list.findIndex((item) => item?.url && item?.url === url) !== -1;
     if (!isHaveSameUrl) {
       if (this.list.length === 0) mitter.emit("haveMedia", true);
-      this.list.push({ url, type, duration });
+      this.list.push({ url, type, duration, audioUrl });
       mitter.emit("sendMedia", this.list);
     }
   }
@@ -118,29 +117,32 @@ class Crab {
   // 监听消息
   listenMsg() {
     Utils.startListener();
-    Utils.getValue("ffandownURL").then((url) => {
-      this.ffandownURL = url;
+    Utils.getValue("ffandownConfig").then((configStringify) => {
+      this.backendConfig = JSON.parse(configStringify);
     });
-    mitter.on("getServerUrl", () => this.ffandownURL);
+    mitter.on("getServerConfig", () => this.backendConfig);
     mitter.on("sendDownload", ({ data, index }) => {
       Utils.getTopTitle()
         .then((title) => {
-          if (!this.ffandownURL) {
-            Utils.message("Please Set ServerUrl First");
+          // check sever config
+          if (!this.backendConfig?.url || !this.backendConfig?.params) {
+            Utils.message("Please Set Server Url And Params First");
           } else {
-            Utils.sendDownloadToFFandown(
-              this.ffandownURL,
-              data.url,
-              title + "-" + (index + 1),
-            );
+            Utils.sendDownloadRequest({
+              serverConfig: this.backendConfig,
+              url: data.url,
+              name: title + "-" + (index + 1),
+              audioUrl: data?.audioUrl,
+            });
           }
         })
         .catch((e) => console.error(e));
     });
     mitter.on("getMedia", () => this.list);
-    mitter.on("serverUrl", (url) => {
-      Utils.setValue("ffandownURL", url);
-      this.ffandownURL = url;
+    mitter.on("setServerConfig", (config) => {
+      Utils.setValue("ffandownConfig", JSON.stringify(config));
+      // update ffandown config
+      this.backendConfig = config;
     });
   }
 

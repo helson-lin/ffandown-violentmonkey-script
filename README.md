@@ -9,6 +9,7 @@ This is a Tampermonkey Script for [ffandown](https://github.com/helson-lin/ffand
 - support bilibili video parse
 - support download video in a post
 - support video url copy
+- support custom api option
 
 ## Usage
 
@@ -20,3 +21,5 @@ You need to modify the variable `FFANDOWN_URL` in the script to the address of y
 ### Version 1.3 and above
 
 You can use the script directly, and the script will automatically parse the video address, if any video have parsed, you can click `resouces` button to preview all the parsed video.
+
+

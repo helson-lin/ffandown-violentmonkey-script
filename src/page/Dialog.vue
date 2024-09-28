@@ -1,13 +1,13 @@
 <template>
-    <div class="crab-dialog" v-if="show" @click="dialogClick">
-        <div class="crab-dialog-inner">
-            <div class="crab-dialog-inner-header">
-                <div class="text-md">{{ title }}</div>
+    <div class="crab-dialog absolute left-0 right-0 top-0 bottom-0 bg-opacity-60 bg-black flex items-center justify-center z-50 pointer-events-auto" v-if="show" @click="dialogClick">
+        <div class="max-w-2xl min-w-fit bg-white rounded-md shadow-lg">
+            <div class="h-12 px-2 border-b flex items-center justify-between border-gray-300">
+                <div class="text-base">{{ title }}</div>
                 <div class="close-icon crab-icon" @click="close">
                     <svg t="1715249520484" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="1041" width="20" height="20"><path d="M567.192 513.223l209.774-209.774c15.55-15.551 15.55-40.763 0-56.313-15.551-15.55-40.762-15.55-56.313 0L510.879 456.91 301.104 247.136c-15.551-15.55-40.762-15.55-56.313 0-15.55 15.55-15.55 40.763 0 56.313l209.774 209.774-209.774 209.775c-15.55 15.55-15.55 40.763 0 56.313 7.775 7.775 17.966 11.663 28.157 11.663 10.191 0 20.381-3.887 28.157-11.663l209.774-209.774 209.774 209.774c7.776 7.776 17.965 11.663 28.157 11.663 10.189 0 20.382-3.889 28.157-11.663 15.55-15.55 15.55-40.763 0-56.313L567.192 513.223z" fill="" p-id="1042"></path></svg>
                 </div>
             </div>
-            <div class="crab-dialog-inner-content">
+            <div class="w-full min-h-64">
                 <slot></slot>
             </div>
         </div>
