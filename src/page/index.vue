@@ -1,40 +1,29 @@
 <template>
     <div id="crab-root" class="pointer-events-none" @keydown.stop @keyup.stop>
-        <div v-show="ffandownTool" ref="crabRef" class="fixed right-4 bottom-4 w-12 h-12 bg-white rounded-full shadow-2xl shadow-black px-2 py-2 z-50 cursor-pointer pointer-events-auto" style="z-index: 33199;" @click="toggleBtn">
-            <svg
-                t="1715233840752"
-                class="w-full h-full"
-                viewBox="0 0 1024 1024"
-                version="1.1"
-                xmlns="http://www.w3.org/2000/svg"
-                p-id="981"
-                width="200"
-                height="200"
-            >
+        <div v-show="ffandownTool" ref="crabRef"
+            class="sm:w-8 sm:h-8 md:w-8 md:h-8 fixed right-4 bottom-4 w-12 h-12 bg-white rounded-full shadow-2xl shadow-black px-2 py-2 z-50 cursor-pointer pointer-events-auto"
+            style="z-index: 33199" @click="toggleBtn">
+            <svg t="1715233840752" class="w-full h-full" viewBox="0 0 1024 1024" version="1.1"
+                xmlns="http://www.w3.org/2000/svg" p-id="981" width="200" height="200">
                 <path
                     d="M832 810.666667H725.333333v-302.933334a2.858667 2.858667 0 0 0-5.589333-0.853333 128.042667 128.042667 0 0 1-129.28 90.282667A132.864 132.864 0 0 1 469.333333 462.08V426.666667a298.666667 298.666667 0 0 0-298.666666 298.666666v42.666667a170.666667 170.666667 0 0 0 170.666666 170.666667h152.704a42.453333 42.453333 0 0 1-24.704-38.4V853.333333h85.333334v46.933334a42.453333 42.453333 0 0 1-24.704 38.4h134.741333a42.453333 42.453333 0 0 1-24.704-38.4V853.333333h85.333333v46.933334a42.453333 42.453333 0 0 1-24.704 38.4H832a64 64 0 0 0 0-128zM554.666667 170.666667l-128 85.333333V94.165333a21.333333 21.333333 0 0 1 36.437333-15.061333zM640 170.666667l128 85.333333V94.165333a21.333333 21.333333 0 0 0-36.437333-15.061333z"
-                    p-id="982"
-                ></path>
+                    p-id="982"></path>
                 <path
                     d="M725.333333 170.666667h-298.666666v128a170.666667 170.666667 0 0 0 341.333333 0V170.666667z m-202.666666 149.333333a32 32 0 1 1 32-32 32 32 0 0 1-32 32z m160 0a32 32 0 1 1 32-32 32 32 0 0 1-32 32z"
-                    p-id="983"
-                ></path>
+                    p-id="983"></path>
             </svg>
             <!-- 查看资源/设置 -->
-            <div :class="{ show: showFastBtn }" class="flex flex-col rounded-md absolute right-16 bottom-0 z-50 bg-white opacity-0 shadow-2xl shadow-black">
-                <div
-                    class="w-full flex items-center  px-2 py-1 cursor-pointer rounded-md hover:bg-slate-100"
-                    v-for="btn in fastBtns"
-                    :key="btn.code"
-                    @click.stop="btn?.action"
-                >
+            <div :class="{ show: showFastBtn }"
+                class="flex flex-col rounded-md absolute right-16 bottom-0 z-50 bg-white opacity-0 shadow-2xl shadow-black">
+                <div class="w-full flex items-center px-2 py-1 cursor-pointer rounded-md hover:bg-slate-100"
+                    v-for="btn in fastBtns" :key="btn.code" @click.stop="btn?.action" @touchstart.stop="btn?.action">
                     <span class="w-4 h-4 mb-1" v-html="btn.icon"></span>
                     <span class="ml-2 w-16 text-sm leading-4">{{ btn.name }}</span>
                 </div>
             </div>
         </div>
         <Dialog v-model:show="showResouce" title="资源">
-            <MediaList />
+            <MediaList :list="mediaList"/>
         </Dialog>
         <Dialog v-model:show="showSetting" title="设置">
             <Setting />
@@ -43,7 +32,7 @@
 </template>
 <script>
 import mitter from "../bin/mitter.js";
-import { defineComponent, onMounted, ref } from "vue";
+import { defineComponent, onMounted, onUnmounted, ref } from "vue";
 import Dialog from "./Dialog.vue";
 import Setting from "./Setting.vue";
 import MediaList from "./MediaList.vue";
@@ -55,6 +44,7 @@ export default defineComponent({
         const showSetting = ref(false);
         const showResouce = ref(false);
         const crabRef = ref(null);
+        const mediaList = ref([]);
         const fastBtns = ref([
             {
                 name: "查看资源",
@@ -78,18 +68,20 @@ export default defineComponent({
         const toggleBtn = () => (showFastBtn.value = !showFastBtn.value);
         function makeDraggable(element) {
             let isDragging = false;
-            let offsetX, offsetY;
-
+            let offsetX, offsetY,startX,startY;
+            let touchStartTime = 0;
             element.addEventListener("touchstart", handleTouchStart);
             element.addEventListener("mousedown", handleMouseDown);
 
             function handleTouchStart(event) {
-                event.preventDefault();
-                isDragging = true;
                 const touch = event.touches[0];
+                startX = touch.clientX;
+                startY = touch.clientY;
+                touchStartTime = Date.now();
+                isDragging = false;
                 offsetX = touch.clientX - element.offsetLeft;
                 offsetY = touch.clientY - element.offsetTop;
-                element.addEventListener("touchmove", handleTouchMove);
+                element.addEventListener("touchmove", handleTouchMove, { passive: false });
                 element.addEventListener("touchend", handleTouchEnd);
             }
 
@@ -103,9 +95,14 @@ export default defineComponent({
             }
 
             function handleTouchMove(event) {
-                event.preventDefault();
-                if (isDragging) {
-                    const touch = event.touches[0];
+                const touch = event.touches[0];
+                const moveX = Math.abs(touch.clientX - startX);
+                const moveY = Math.abs(touch.clientY - startY);
+
+                // 如果移动距离超过5像素，则认为是拖拽
+                if (moveX > 5 || moveY > 5) {
+                    isDragging = true;
+                    event.preventDefault();
                     element.style.left = touch.clientX - offsetX + "px";
                     element.style.top = touch.clientY - offsetY + "px";
                 }
@@ -119,7 +116,15 @@ export default defineComponent({
                 }
             }
 
-            function handleTouchEnd() {
+            function handleTouchEnd(event) {
+                const touchEndTime = Date.now();
+                const touchDuration = touchEndTime - touchStartTime;
+                
+                // 如果触摸时间小于200ms且没有发生拖拽，则认为是点击
+                if (touchDuration < 200 && !isDragging) {
+                    event.preventDefault();
+                    toggleBtn();
+                }
                 isDragging = false;
                 element.removeEventListener("touchmove", handleTouchMove);
                 element.removeEventListener("touchend", handleTouchEnd);
@@ -132,10 +137,46 @@ export default defineComponent({
             }
         }
 
+        const getJsonData = (data) => {
+            try {
+                return JSON.parse(data)
+            } catch {
+                return null
+            }
+        }
+
         onMounted(() => {
-            makeDraggable(crabRef.value);
-            mitter.on("haveMedia", (val) => (ffandownTool.value = val));
+            // 判断是否为 iframe 嵌入
+            const isIframe = window.self !== window.top;
+            // 只有在非 iframe 或允许在 iframe 中显示时才初始化
+            if (!isIframe) {
+                window.addEventListener('message', handleIframeMessage);
+                makeDraggable(crabRef.value);
+                mitter.on("haveMedia", (val) => (ffandownTool.value = val));
+            } else {
+                ffandownTool.value = false;
+            }
+            mitter.emit("getMedia", (list) => {
+                mediaList.value = list;
+            });
+            mitter.on("sendMedia", (media) => {
+                mediaList.value = media;
+            });
+            // makeDraggable(crabRef.value);
+            // mitter.on("haveMedia", (val) => (ffandownTool.value = val));
         });
+        // 清理事件监听
+        onUnmounted(() => {
+            window.removeEventListener('message', handleIframeMessage);
+        });
+        const handleIframeMessage = (event) => {
+            const messageData = getJsonData(event.data)
+            if (messageData && messageData.type === 'ffandown_media') {
+                mediaList.value = messageData.data;
+                // 如果没有显示按钮，那么先展示按钮
+                if (!ffandownTool.value) ffandownTool.value = true;
+            }
+        };
         return {
             fastBtns,
             ffandownTool,
@@ -143,6 +184,7 @@ export default defineComponent({
             showSetting,
             showResouce,
             crabRef,
+            mediaList,
             toggleBtn,
         };
     },

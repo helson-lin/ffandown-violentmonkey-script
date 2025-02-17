@@ -687,9 +687,12 @@ video {
   width: 100%;
 }
 
-.min-w-fit {
-  min-width: -moz-fit-content;
-  min-width: fit-content;
+.min-w-8 {
+  min-width: 2rem;
+}
+
+.min-w-96 {
+  min-width: 24rem;
 }
 
 .max-w-2xl {
@@ -1212,15 +1215,4 @@ video {
 .active\:ring-indigo-600:active {
   --tw-ring-opacity: 1;
   --tw-ring-color: rgb(79 70 229 / var(--tw-ring-opacity));
-}
-
-@media (min-width: 640px) {
-  .sm\:text-sm {
-    font-size: 0.875rem;
-    line-height: 1.25rem;
-  }
-
-  .sm\:leading-6 {
-    line-height: 1.5rem;
-  }
 }

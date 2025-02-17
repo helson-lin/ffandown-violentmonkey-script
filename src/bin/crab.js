@@ -18,9 +18,14 @@ class Crab {
   // 服务复制
   backendConfig;
   // 资源列表
+  isIframe = false;
   list = [];
+  constructor({ isIframe }) {
+    this.isIframe = isIframe;
+  }
   start() {
     Utils.log("Started");
+    Utils.log(`isIframe@${this.isIframe}`);
     this.intercept(this.contentResolver);
     // 自动检测网址
     this.autoCheckWebsite();
@@ -62,13 +67,29 @@ class Crab {
     const handlers = this.handlers.filter((h) => h.match({ content, url }));
     handlers.forEach((h) => h.handle.bind(this, { content, url })());
   }
+  // 添加新的媒体到解析到的媒体列表
   addMedia({ url, type, duration, audioUrl }) {
     const isHaveSameUrl =
       this.list.findIndex((item) => item?.url && item?.url === url) !== -1;
+    // 判断是否已经存在相同的媒体
     if (!isHaveSameUrl) {
       if (this.list.length === 0) mitter.emit("haveMedia", true);
       this.list.push({ url, type, duration, audioUrl });
-      mitter.emit("sendMedia", this.list);
+      // 如果当前是 iframe 那么不需要给 ui 发送媒体数据的消息而已给 parentwindow 的 ui 发送消息
+      // 如果是 iframe 环境，发送消息给父窗口
+      if (this.isIframe) {
+        this.list.length &&
+          window.parent.postMessage(
+            JSON.stringify({
+              type: "ffandown_media",
+              data: this.list,
+            }),
+            "*"
+          );
+      } else {
+        // 非 iframe 环境，正常发送消息
+        this.list.length && mitter.emit("sendMedia", this.list);
+      }
     }
   }
   async handlerM3u8({ content, url }) {
@@ -152,7 +173,7 @@ class Crab {
     const _this = this;
     if (
       new RegExp("https://www.bilibili.com/video/[a-zA-Z0-9]+/").test(
-        originUrl + pathname,
+        originUrl + pathname
       )
     ) {
       // bilibili播放页面， 读取 window.__playinfo_获取播放信息

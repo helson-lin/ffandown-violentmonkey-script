@@ -1,6 +1,6 @@
 <template>
     <div class="crab-dialog absolute left-0 right-0 top-0 bottom-0 bg-opacity-60 bg-black flex items-center justify-center z-50 pointer-events-auto" v-if="show" @click="dialogClick">
-        <div class="max-w-2xl min-w-fit bg-white rounded-md shadow-lg">
+        <div class="max-w-2xl min-w-8 bg-white rounded-md shadow-lg">
             <div class="h-12 px-2 border-b flex items-center justify-between border-gray-300">
                 <div class="text-base">{{ title }}</div>
                 <div class="close-icon crab-icon" @click="close">

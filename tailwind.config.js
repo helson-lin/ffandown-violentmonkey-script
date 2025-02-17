@@ -2,15 +2,14 @@
 module.exports = {
   content: ["./src/**/*.vue"],
   theme: {
+    screens: {},
     extend: {
-      keyframes: {
-        wiggle: {
-          '0%': { top: '-3rem' },
-          '100%': { top:   '2rem'},
-        }
-      }
+      keyframes: {}
     },
   },
-  plugins: [],
+  plugins: [
+    require('tailwindcss'),
+    require('autoprefixer'),
+  ],
 }
 

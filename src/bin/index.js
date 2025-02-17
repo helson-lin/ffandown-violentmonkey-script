@@ -2,10 +2,15 @@ import Home from '../page/index.vue'
 import globalCSS from '../main.css'
 import Crab from './crab'
 import { createApp } from 'vue'
+
 class TmpScipt {
     crab;
+    isIframe = false;
     constructor() {
-        this.init()
+        this.isIframe = this.getWindowIsIframe()
+        if (!this.isIframe) {           
+            this.init()
+        }
         this.initCrab()
     }
 
@@ -14,8 +19,12 @@ class TmpScipt {
     }
 
     initCrab () {
-        this.crab = new Crab();
+        this.crab = new Crab({ isIframe: this.isIframe });
         this.crab.start();
+    }
+
+    getWindowIsIframe () {
+        return window.self !== window.top;
     }
 
     createShadowDom() {
@@ -27,5 +36,4 @@ class TmpScipt {
         shadowDOM.querySelector('style').innerHTML = globalCSS;
     }
 }
-
 export default TmpScipt
