@@ -2,7 +2,7 @@
     <div id="crab-root" class="pointer-events-none" @keydown.stop @keyup.stop>
         <div v-show="ffandownTool" ref="crabRef"
             class="sm:w-8 sm:h-8 md:w-8 md:h-8 fixed right-4 bottom-12 w-12 h-12 bg-white rounded-full shadow-2xl shadow-black px-2 py-2 z-50 cursor-pointer pointer-events-auto"
-            style="z-index: 33199" @click="toggleBtn" @touchstart.stop="toggleBtn">
+            style="z-index: 33199">
             <svg t="1715233840752" class="w-full h-full" viewBox="0 0 1024 1024" version="1.1"
                 xmlns="http://www.w3.org/2000/svg" p-id="981" width="200" height="200">
                 <path
@@ -74,6 +74,7 @@ export default defineComponent({
         // 监听快捷按钮的拖拽
         function makeDraggable(target) {
             isDragging.value = false;
+            let newX, newY;
             let offsetX = 0;
             let offsetY = 0;
 
@@ -105,13 +106,12 @@ export default defineComponent({
                 const clientY = e.touches ? e.touches[0].clientY : e.clientY;
 
                 // 计算元素新位置（需要处理超出屏幕的情况）
-                let newX = clientX - offsetX;
-                let newY = clientY - offsetY;
+                newX = clientX - offsetX;
+                newY = clientY - offsetY;
 
                 // 限制边界（可根据需要调整）
                 newX = Math.max(0, Math.min(newX, window.innerWidth - target.offsetWidth));
                 newY = Math.max(0, Math.min(newY, window.innerHeight - target.offsetHeight));
-
                 target.style.left = `${newX}px`;
                 target.style.top = `${newY}px`;
                 
@@ -119,13 +119,15 @@ export default defineComponent({
             }
 
             // 统一处理指针结束事件
-            function handleEnd() {
+            function handleEnd(e) {
                 isDragging.value = false;
+                if (!newX && !newY && offsetX >=0 && offsetY >=0 ) toggleBtn();
+                newX = 0;newY = 0;
             }
 
             if (isMobile) {
-                target.addEventListener('touchstart', handleStart, {passive: false});
-                document.addEventListener('touchmove', handleMove, {passive: false});
+                target.addEventListener('touchstart', handleStart, { passive: false });
+                document.addEventListener('touchmove', handleMove, { passive: false });
                 document.addEventListener('touchend', handleEnd);
             } else {
                 // 事件监听（同时支持移动端和桌面端）
