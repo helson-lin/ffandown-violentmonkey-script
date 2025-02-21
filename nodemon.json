@@ -6,6 +6,6 @@
     "src/page/*"
   ],
   "ignore": [],
-  "exec": "npm run build:css && npm run build:prod",
+  "exec": "npm run build:css && npm run build:dev",
   "ext": "js txt css vue"
 }

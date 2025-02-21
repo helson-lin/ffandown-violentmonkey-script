@@ -1,8 +1,9 @@
 const Utils = {
   log(content) {
     const fun = console.log;
+    const isIframe = window.self !== window.top;
     const args = [
-      `%c Crab %c ${content}`,
+      `%c Crab ${isIframe ? 'in iframe' : ''} %c ${content}`,
       "padding: 2px 1px; border-radius: 0; color: #fff; background: #606060; font-weight: bold;",
       "padding: 2px 5px 2px 2px; border-radius: 0; color: #fff; background: #AF8FE8; font-weight: bold;",
     ];
@@ -34,6 +35,7 @@ const Utils = {
       open_in_background,
     );
   },
+  // 消息提示通知
   message(text, type) {
     if (!this.notyf) {
       this.notyf = new Notyf({
@@ -179,7 +181,8 @@ const Utils = {
       window.top.postMessage("3j4t9uj349-gm-get-title", "*");
     });
   },
-  checkM3u8Content({ content }) {
+  checkM3u8Content({ content, url }) {
+    if (url && Utils.isM3U8URL(url)) return true;
     // 如果内容为m3u8的则返回true
     if (content.trim().startsWith("#EXTM3U")) {
       return true;
@@ -260,6 +263,137 @@ const Utils = {
       }
     }
   },
+  // head 请求 url 通过 content-type 判断是否为视频文件
+  // 如果请求失败或者超时，那么采用默认正则判断方法来识别是否为视频文件
+  headURL(url) {
+    return new Promise((resolve, reject) => {
+      const timer = setTimeout(() => {
+        // 如果超时采用普通的方法判断
+        resolve(Utils.isVideoUrl(url));
+        // reject(new Error('Request timeout'));  // 全局超时兜底 ↓
+      }, 3000 + 500);  // 比请求超时稍长
+      try {
+        this.xmlHttpRequest({
+          url,
+          method: "HEAD",
+          headers: {
+            'Referer': url,
+            'X-Requested-With': 'XMLHttpRequest',
+          },
+          crossOrigin: true,  // 显式启用跨域模式
+          fetch: true,
+          timeout: 3000,
+          onload(r) {
+            clearTimeout(timer);
+            try {
+              const status = r.status;
+              const responseHeaders = r.responseHeaders.split('\r\n');
+              const contentType = responseHeaders.find((i) => i.startsWith('content-type') || i.startsWith('Content-Type'))?.split(':')[1];
+              if (status && status === 200 && contentType) {
+                // 返回 true/false 表示是否为视频文件
+                const isVideo = contentType.includes("video/");
+                console.warn('contentType', contentType)
+                resolve({
+                  isVideo,
+                  type: contentType.split('/')[1]
+                });
+              } else {
+                resolve(Utils.isVideoUrl(url));
+              }
+            } catch {
+              resolve(Utils.isVideoUrl(url));
+            }
+          },
+          ontimeout: response => { 
+            clearTimeout(timer);
+            resolve(Utils.isVideoUrl(url));
+          },
+          onerror(e) {
+            clearTimeout(timer);
+            resolve(Utils.isVideoUrl(url));
+          },
+          onabort: () => { 
+            clearTimeout(timer);
+            resolve(Utils.isVideoUrl(url));
+          }
+        });
+      } catch (e) {
+        clearTimeout(timer);
+        resolve(Utils.isVideoUrl(url));
+      }
+    });
+  },
+  nextTick(cb) {
+    if (cb && typeof cb === "function") {
+      setTimeout(cb, 1000);
+    }
+  },
+  isURL(str) {
+    try {
+      new URL(str);
+      return true;
+    } catch (_) {
+      return false;
+    }
+  },
+  // 获取嵌套的地址
+  getNestedUrl(currentUrl) {
+    try {
+      const url = new URL(currentUrl);
+      const searchParams = new URLSearchParams(url.search);
+      const embeddedUrl = searchParams.get('url');
+      return embeddedUrl || currentUrl;
+    } catch {
+      return currentUrl;
+    }
+  },
+  // 是否为 m3u8 地址
+  isM3U8URL(content) {
+    const m3u8Regex = /https?:\/\/[a-zA-Z0-9.-]+\.?[a-zA-Z]{2,}(?:\/[^\s]*)?(?:\?[^#]*)?(?:#.*)?\.m3u8/gi;
+    const matches = content.match(m3u8Regex);
+    return (matches && matches.length) ?? false;
+  },
+  debounce(func, delay = 300) {
+    let timeout;
+    return function debouncedFunc(...args) {
+      clearTimeout(timeout);
+      timeout = setTimeout(() => {
+        func.apply(this, args);
+      }, delay);
+    };
+  },
+  // 是否为视频地址
+  isVideoUrl(url) {
+    function getMatch (path) {
+        const pathMatched = path.match(videoExtensions)
+        if (!pathMatched) return null
+        if (!pathMatched[1]) return null
+        return pathMatched[1].toUpperCase()
+    }
+    // 常见视频扩展名列表，可根据需要调整
+    const videoExtensions = /\.(mp4|mov|avi|webm|mkv|flv|wmv|mpeg|mpg|3gp|ogv|m4v|ts|m3u8)$/i;
+    // 移除URL中的查询参数和哈希部分
+    const path = url.split(/[?#]/)[0];
+    // 检查路径是否以视频扩展名结尾
+    const isSuffixVideo =  videoExtensions.test(path);
+    if (isSuffixVideo) return {
+        isVideo: true,
+        type: getMatch(path),
+    };
+    const searchParams = new URL(url).searchParams
+    const searchParamsArr = Array.from(searchParams.entries())
+    const videoInQuery = searchParamsArr.find(([k, v]) => videoExtensions.test(v))
+    if (videoInQuery) {
+        return {
+            isVideo: true,
+            type: getMatch(videoInQuery[1]),
+        }
+    } else {
+        return {
+            isVideo: false,
+        }
+    }
+  }
 };
 
 export default Utils;

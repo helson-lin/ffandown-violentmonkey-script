@@ -32,6 +32,7 @@ class TmpScipt {
         document.documentElement.appendChild(rootDiv);
         const shadowDOM = rootDiv.attachShadow({ mode: 'open' });
         createApp(Home).mount(shadowDOM);
+        rootDiv.style.fontSize = '12px';
         rootDiv.shadowRoot.appendChild(document.createElement('style'))
         shadowDOM.querySelector('style').innerHTML = globalCSS;
     }

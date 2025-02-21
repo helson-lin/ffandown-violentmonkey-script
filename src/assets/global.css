@@ -2,20 +2,10 @@
 @tailwind components;
 @tailwind utilities;
 
-:host {
-  --root-size: 14px; /* 默认值 */
-}
-
-@media (min-width: 768px) {
-  :host {
-    --root-size: 16px; /* PC 端的值 */
-  }
-}
 
 #crab-root {
   color: #000;
   font-family: monospace, sans-serif;
-  font-size: clac(var(--root-size) / 2);
 }
 /* 
 #crab-root .btn {

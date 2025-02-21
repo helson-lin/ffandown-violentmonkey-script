@@ -29,6 +29,7 @@ export default defineComponent({
         }
     },
     setup(_, ctx) {
+        // 如果点击 dialog 外部区域，则关闭 dialog
         const dialogClick = (ev) => {
             const element = ev.target
             const isOuter = Array.from(element.classList).includes('crab-dialog')

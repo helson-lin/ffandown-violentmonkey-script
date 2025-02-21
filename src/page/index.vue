@@ -1,8 +1,8 @@
 <template>
     <div id="crab-root" class="pointer-events-none" @keydown.stop @keyup.stop>
         <div v-show="ffandownTool" ref="crabRef"
-            class="sm:w-8 sm:h-8 md:w-8 md:h-8 fixed right-4 bottom-4 w-12 h-12 bg-white rounded-full shadow-2xl shadow-black px-2 py-2 z-50 cursor-pointer pointer-events-auto"
-            style="z-index: 33199" @click="toggleBtn">
+            class="sm:w-8 sm:h-8 md:w-8 md:h-8 fixed right-4 bottom-12 w-12 h-12 bg-white rounded-full shadow-2xl shadow-black px-2 py-2 z-50 cursor-pointer pointer-events-auto"
+            style="z-index: 33199" @click="toggleBtn" @touchstart.stop="toggleBtn">
             <svg t="1715233840752" class="w-full h-full" viewBox="0 0 1024 1024" version="1.1"
                 xmlns="http://www.w3.org/2000/svg" p-id="981" width="200" height="200">
                 <path
@@ -15,7 +15,7 @@
             <!-- 查看资源/设置 -->
             <div :class="{ show: showFastBtn }"
                 class="flex flex-col rounded-md absolute right-16 bottom-0 z-50 bg-white opacity-0 shadow-2xl shadow-black">
-                <div class="w-full flex items-center px-2 py-1 cursor-pointer rounded-md hover:bg-slate-100"
+                <div class="w-full flex items-center px-2 py-2 cursor-pointer rounded-md hover:bg-slate-100"
                     v-for="btn in fastBtns" :key="btn.code" @click.stop="btn?.action" @touchstart.stop="btn?.action">
                     <span class="w-4 h-4 mb-1" v-html="btn.icon"></span>
                     <span class="ml-2 w-16 text-sm leading-4">{{ btn.name }}</span>
@@ -32,6 +32,7 @@
 </template>
 <script>
 import mitter from "../bin/mitter.js";
+import utils from "../bin/utils.js"
 import { defineComponent, onMounted, onUnmounted, ref } from "vue";
 import Dialog from "./Dialog.vue";
 import Setting from "./Setting.vue";
@@ -43,6 +44,7 @@ export default defineComponent({
         const showFastBtn = ref(false);
         const showSetting = ref(false);
         const showResouce = ref(false);
+        const isDragging = ref(false);
         const crabRef = ref(null);
         const mediaList = ref([]);
         const fastBtns = ref([
@@ -65,75 +67,71 @@ export default defineComponent({
                 },
             },
         ]);
-        const toggleBtn = () => (showFastBtn.value = !showFastBtn.value);
-        function makeDraggable(element) {
-            let isDragging = false;
-            let offsetX, offsetY,startX,startY;
-            let touchStartTime = 0;
-            element.addEventListener("touchstart", handleTouchStart);
-            element.addEventListener("mousedown", handleMouseDown);
+        const toggleBtn = utils.debounce(() => {
+            if (!isDragging.value) showFastBtn.value = !showFastBtn.value
+        }, 100)
+    
+        // 监听快捷按钮的拖拽
+        function makeDraggable(target) {
+            isDragging.value = false;
+            let offsetX = 0;
+            let offsetY = 0;
 
-            function handleTouchStart(event) {
-                const touch = event.touches[0];
-                startX = touch.clientX;
-                startY = touch.clientY;
-                touchStartTime = Date.now();
-                isDragging = false;
-                offsetX = touch.clientX - element.offsetLeft;
-                offsetY = touch.clientY - element.offsetTop;
-                element.addEventListener("touchmove", handleTouchMove, { passive: false });
-                element.addEventListener("touchend", handleTouchEnd);
+            const isMobile = isMobileDevice();
+            function isMobileDevice() {
+                return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
             }
-
-            function handleMouseDown(event) {
-                event.preventDefault();
-                isDragging = true;
-                offsetX = event.clientX - element.offsetLeft;
-                offsetY = event.clientY - element.offsetTop;
-                document.addEventListener("mousemove", handleMouseMove);
-                document.addEventListener("mouseup", handleMouseUp);
-            }
-
-            function handleTouchMove(event) {
-                const touch = event.touches[0];
-                const moveX = Math.abs(touch.clientX - startX);
-                const moveY = Math.abs(touch.clientY - startY);
-
-                // 如果移动距离超过5像素，则认为是拖拽
-                if (moveX > 5 || moveY > 5) {
-                    isDragging = true;
-                    event.preventDefault();
-                    element.style.left = touch.clientX - offsetX + "px";
-                    element.style.top = touch.clientY - offsetY + "px";
-                }
-            }
-
-            function handleMouseMove(event) {
-                event.preventDefault();
-                if (isDragging) {
-                    element.style.left = event.clientX - offsetX + "px";
-                    element.style.top = event.clientY - offsetY + "px";
-                }
-            }
-
-            function handleTouchEnd(event) {
-                const touchEndTime = Date.now();
-                const touchDuration = touchEndTime - touchStartTime;
+            // 统一处理指针起始事件
+            function handleStart(e) {
+                // 移动端获取第一个触摸点
+                const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+                const clientY = e.touches ? e.touches[0].clientY : e.clientY;
                 
-                // 如果触摸时间小于200ms且没有发生拖拽，则认为是点击
-                if (touchDuration < 200 && !isDragging) {
-                    event.preventDefault();
-                    toggleBtn();
-                }
-                isDragging = false;
-                element.removeEventListener("touchmove", handleTouchMove);
-                element.removeEventListener("touchend", handleTouchEnd);
+                // 计算元素偏移量（点击位置距元素左上角的距离）
+                offsetX = clientX - target.offsetLeft;
+                offsetY = clientY - target.offsetTop;
+                isDragging.value = true;
+
+                // 防止移动端屏幕滚动
+                e.preventDefault();
             }
 
-            function handleMouseUp() {
-                isDragging = false;
-                document.removeEventListener("mousemove", handleMouseMove);
-                document.removeEventListener("mouseup", handleMouseUp);
+            // 统一处理指针移动事件
+            function handleMove(e) {
+                if (!isDragging.value) return;
+
+                // 处理兼容性获取坐标
+                const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+                const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+
+                // 计算元素新位置（需要处理超出屏幕的情况）
+                let newX = clientX - offsetX;
+                let newY = clientY - offsetY;
+
+                // 限制边界（可根据需要调整）
+                newX = Math.max(0, Math.min(newX, window.innerWidth - target.offsetWidth));
+                newY = Math.max(0, Math.min(newY, window.innerHeight - target.offsetHeight));
+
+                target.style.left = `${newX}px`;
+                target.style.top = `${newY}px`;
+                
+                e.preventDefault();
+            }
+
+            // 统一处理指针结束事件
+            function handleEnd() {
+                isDragging.value = false;
+            }
+
+            if (isMobile) {
+                target.addEventListener('touchstart', handleStart, {passive: false});
+                document.addEventListener('touchmove', handleMove, {passive: false});
+                document.addEventListener('touchend', handleEnd);
+            } else {
+                // 事件监听（同时支持移动端和桌面端）
+                target.addEventListener('mousedown', handleStart);
+                document.addEventListener('mousemove', handleMove);
+                document.addEventListener('mouseup', handleEnd);
             }
         }
 
@@ -150,13 +148,17 @@ export default defineComponent({
             const isIframe = window.self !== window.top;
             // 只有在非 iframe 或允许在 iframe 中显示时才初始化
             if (!isIframe) {
+                // 监听 iframe 的消息只需要在上层窗口执行
                 window.addEventListener('message', handleIframeMessage);
                 makeDraggable(crabRef.value);
-                mitter.on("haveMedia", (val) => (ffandownTool.value = val));
+                // 如果数据层发送了 haveMedia 消息表示需要展示快捷按钮
+                mitter.on("haveMedia", (val) => { ffandownTool.value = val});
             } else {
+                // 在 iframe 内不展示快捷按钮，iframe 内监听到的媒体数据都给上层窗口
                 ffandownTool.value = false;
             }
             mitter.emit("getMedia", (list) => {
+                // 更新当前的媒体列表
                 mediaList.value = list;
             });
             mitter.on("sendMedia", (media) => {
@@ -169,8 +171,10 @@ export default defineComponent({
         onUnmounted(() => {
             window.removeEventListener('message', handleIframeMessage);
         });
+        // 监听 iframe 发送过来的消息
         const handleIframeMessage = (event) => {
             const messageData = getJsonData(event.data)
+            // 如果 iframe 上抛了媒体数据，那么添加到媒体列表内
             if (messageData && messageData.type === 'ffandown_media') {
                 mediaList.value = messageData.data;
                 // 如果没有显示按钮，那么先展示按钮
